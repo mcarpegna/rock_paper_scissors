@@ -1,50 +1,90 @@
 function getComputerChoice() {
     const options = ['rock', 'paper', 'scissors'];
-    const getComputerChoice = options[Math.floor(Math.random() * options.length)];
-    return getComputerChoice;
+    let computerChoice = options[Math.floor(Math.random() * options.length)];
+    return computerChoice;
 }
 
 function game() {
     let playerScore = 0;
     let computerScore = 0;
+    let roundCount = 0
+    let activeButton = null; // variable to store the previously selected button
 
-    for (i = 1; i <= 5; i++) {
+    const container = document.querySelector('.container');
 
-        const playerSelection = prompt("Ingresa una palabra o frase:").toLowerCase();
-        const computerSelection = getComputerChoice();
-
-        function playRound(playerSelection, computerSelection) {
-        
-            if (playerSelection === "rock" && computerSelection === "paper" ||
-                playerSelection === "paper" && computerSelection === "scissors" ||
-                playerSelection === "scissors" && computerSelection === "rock") {
-                computerScore = computerScore + 1 ;
-                console.log(`You Lose! ${computerSelection} beats ${playerSelection}`);
-            } else if(playerSelection === computerSelection) {
-                computerScore = computerScore + 0;
-                playerScore = playerScore + 0;
-                console.log(`It's a Tie! ${computerSelection} equals ${playerSelection}`);
-            } else {
-                playerScore = playerScore + 1;
-                console.log(`You Win! ${playerSelection} beats ${computerSelection}`);
-
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const playerSelection = button.dataset.value; // takes de data-value for each button
+            const computerSelection = getComputerChoice();
+            playRound(playerSelection, computerSelection);
+            if (activeButton !== null) {
+                activeButton.classList.remove('active'); // remove "active" class from the previously selected button
             }
+            button.classList.add('active'); // add "active" class to the current button
+            activeButton = button; // update the previously selected button
+        });
+    });
 
+    const roundResult = document.createElement('div');
+    roundResult.classList.add('roundResult', 'buttonLike');
+    roundResult.textContent = `Round 0:`;
+    container.appendChild(roundResult);
+
+    const scoreUpdate = document.createElement('div');
+    scoreUpdate.classList.add('scoreUpdate', 'buttonLike');
+    scoreUpdate.textContent = `Score:`;
+
+    container.appendChild(scoreUpdate);
+
+    const finalResult = document.createElement('div');
+    finalResult.classList.add('finalResult', 'buttonLike');
+    finalResult.textContent = "Final result:";
+    container.appendChild(finalResult);
+
+    const replayDiv = document.createElement('div');
+    replayDiv.classList.add('replayDiv');
+    container.appendChild(replayDiv);
+
+    const replayGame = document.createElement('button');
+    replayGame.classList.add('replayGame', 'btn');
+    replayGame.textContent = "Play again?";
+
+
+    function playRound(playerSelection, computerSelection) {
+        if (playerScore === 5 || computerScore === 5) {
+            return; // exit the function without doing anything if maximum score has  been reached.
         }
 
-        playRound(playerSelection, computerSelection);
-        console.log (`Round ${i}: Player played: ${playerSelection}; Computer played: ${computerSelection}`);
-        console.log (`Player points: ${playerScore}; Computer points: ${computerScore}`);
-    }
+        if (playerSelection === "rock" && computerSelection === "paper" ||
+            playerSelection === "paper" && computerSelection === "scissors" ||
+            playerSelection === "scissors" && computerSelection === "rock") {
+            computerScore++;
+            roundCount++;
+            roundResult.textContent = `Round ${roundCount}: Computer chose ${computerSelection}. You lose!`;
+            scoreUpdate.textContent = `Score: You ${playerScore}; Computer ${computerScore}`;
+        } else if (playerSelection === computerSelection) {
+            computerScore += 0;
+            playerScore += 0;
+            roundCount++;
+            roundResult.textContent = `Round ${roundCount}: Computer chose ${computerSelection}. It's a tie!`;
+            scoreUpdate.textContent = `Score: You ${playerScore}; Computer ${computerScore}`;
+        } else {
+            playerScore++;
+            roundCount++;
+            roundResult.textContent = `Round ${roundCount}: Computer chose ${computerSelection}. You Win!`;
+            scoreUpdate.textContent = `Score: You ${playerScore}; Computer ${computerScore}`;
+        }
 
-    if(playerScore < computerScore) {
-        return `Player total score = ${playerScore}; Computer total score = ${computerScore}. Computer Wins!`
-    } else if (playerScore > computerScore) {
-        return `Player total score = ${playerScore}; Computer total score = ${computerScore}. Player Wins!`
-    } else {
-        return `Player total score = ${playerScore}; Computer total score = ${computerScore}. It's a Tie!`
+        if (playerScore === 5 || computerScore === 5) {
+            const winner = playerScore > computerScore ? "You" : "Computer";
+            finalResult.textContent = `The winner is: ${winner}!`;
+            replayDiv.appendChild(replayGame);
+            replayGame.addEventListener('click', function () {
+                location.reload();
+            });
+        }
     }
-
 }
 
-console.log(game());
+game();
